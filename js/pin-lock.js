@@ -15,8 +15,8 @@
   var PIN_LENGTH = PIN_VALUE.length;
   var STORAGE_KEY = 'oceanPinUnlocked';
 
-  // Countdown target: September 6, 23:59 (one minute before midnight).
-  var TARGET_DATE = new Date(new Date().getFullYear(), 8, 6, 23, 59, 0);
+  // Countdown target: the first second of September 7 (00:00:00).
+  var TARGET_DATE = new Date(new Date().getFullYear(), 8, 7, 0, 0, 0);
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function ready(fn) {
@@ -48,14 +48,9 @@
       savedLockAnchor = lock.parentNode || document.body;
     }
 
-    // Already unlocked earlier this session — skip straight to the site.
-    try {
-      if (window.sessionStorage && sessionStorage.getItem(STORAGE_KEY) === '1') {
-        lock.parentNode && lock.parentNode.removeChild(lock);
-        setTimeout(function() { window.dispatchEvent(new Event('pinUnlocked')); }, 500);
-        return;
-      }
-    } catch (e) { /* sessionStorage unavailable — show the lock normally */ }
+    // Always show the lock on a fresh page load. The session flag is only used
+    // within a visit to allow the re-lock button to gate the site again.
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
 
     setupLock(lock);
   }
@@ -66,14 +61,13 @@
     if (!lock) return;
     var card       = lock.querySelector('.pin-lock__card');
     var countdown  = lock.querySelector('.pin-lock__countdown');
-    var reveal     = lock.querySelector('.pin-lock__reveal');
     var timerEl    = lock.querySelector('.pin-lock__timer');
     var digitsWrap = lock.querySelector('.pin-lock__digits');
     var input      = lock.querySelector('.pin-lock__hidden-input');
     var errorEl    = lock.querySelector('.pin-lock__error');
     var form       = lock.querySelector('.pin-lock__form');
 
-    if (!card || !countdown || !reveal || !timerEl || !digitsWrap || !input || !form) return;
+    if (!card || !countdown || !timerEl || !digitsWrap || !input || !form) return;
 
     input.setAttribute('maxlength', String(PIN_LENGTH));
 
@@ -89,7 +83,7 @@
       boxes.push(box);
     }
 
-    // ---- Countdown: gate the site until Sept 6 at 23:59, then reveal the code ----
+    // ---- Countdown to Sept 7 at 23:59 (the code is already shown above) ----
     var timerCells = {
       days:  timerEl.querySelector('#pinTimerDays'),
       hours: timerEl.querySelector('#pinTimerHours'),
@@ -99,21 +93,9 @@
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
-    function revealCode() {
-      clearInterval(timerInterval);
-      countdown.hidden = true;
-      reveal.hidden = false;
-      setTimeout(function () {
-        try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
-      }, reducedMotion ? 0 : 350);
-    }
-
     function tick() {
       var diff = TARGET_DATE.getTime() - Date.now();
-      if (diff <= 0) {
-        revealCode();
-        return;
-      }
+      if (diff < 0) diff = 0;
       timerCells.days.textContent  = pad(Math.floor(diff / 86400000));
       timerCells.hours.textContent = pad(Math.floor(diff / 3600000) % 24);
       timerCells.mins.textContent  = pad(Math.floor(diff / 60000) % 60);
@@ -242,7 +224,7 @@
     });
 
     // Re-run the lock init: it re-inserts the saved markup and re-shows the lock.
-    // The countdown target is fixed (Sept 6 23:59), so remaining time resumes.
+    // The countdown target is fixed (Sept 7 23:59), so remaining time resumes.
     init();
   }
 
@@ -252,5 +234,16 @@
   document.addEventListener('DOMContentLoaded', function () {
     var btn = document.getElementById('relockBtn');
     if (btn) btn.addEventListener('click', relock);
+  });
+
+  // Force the lock screen back on EVERY page show — including refresh and
+  // back/forward-cache restores where the DOM is restored without re-running
+  // the original init (which is why the lock can appear missing).
+  window.addEventListener('pageshow', function () {
+    var locked = document.documentElement.classList.contains('pin-locked');
+    var lockPresent = !!document.getElementById('pinLock');
+    if (!lockPresent || !locked) {
+      relock();
+    }
   });
 })(window, document);

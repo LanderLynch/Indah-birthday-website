@@ -103,27 +103,53 @@
     if (titleEl)  titleEl.textContent  = track.title  || 'Play music';
     if (artistEl) artistEl.textContent = track.artist || '';
 
-    // ── Lyrics overlay ─────────────────────────────────────────
-    const lyrics = Array.isArray(track.lyrics) ? track.lyrics : [];
-    let currentLyricIdx = -1;
+    // ── Lyrics overlay (word-by-word shine) ──────────────────
+    const lyricLines = Array.isArray(track.lyricWords) ? track.lyricWords : [];
+    let currentLineIdx = -1;
+
+    function buildLine(line) {
+      const frag = document.createDocumentFragment();
+      line.words.forEach(([text, wordTime]) => {
+        const w = document.createElement('span');
+        w.className = 'lyric-word';
+        w.textContent = text;
+        w.dataset.time = String(wordTime);
+        frag.appendChild(w);
+        frag.appendChild(document.createTextNode(' '));
+      });
+      return frag;
+    }
 
     function updateLyrics(t) {
-      if (!lyricsEl || !lyrics.length) return;
-      let idx = -1;
-      for (let i = 0; i < lyrics.length; i++) {
-        if (t >= lyrics[i].time) idx = i;
+      if (!lyricsEl || !lyricLines.length) return;
+      let lineIdx = -1;
+      for (let i = 0; i < lyricLines.length; i++) {
+        if (t >= lyricLines[i].time) lineIdx = i;
         else break;
       }
-      if (idx === currentLyricIdx) return;
-      currentLyricIdx = idx;
-
-      if (idx === -1) {
-        lyricsEl.textContent = '';
-        lyricsEl.classList.remove('is-showing');
+      if (lineIdx === -1) {
+        if (currentLineIdx !== -1) {
+          currentLineIdx = -1;
+          lyricsEl.textContent = '';
+          lyricsEl.classList.remove('is-showing');
+        }
         return;
       }
-      lyricsEl.textContent = lyrics[idx].text;
-      lyricsEl.classList.add('is-showing');
+
+      // Swap to the active line when it changes.
+      if (lineIdx !== currentLineIdx) {
+        currentLineIdx = lineIdx;
+        lyricsEl.textContent = '';
+        lyricsEl.appendChild(buildLine(lyricLines[lineIdx]));
+        lyricsEl.classList.add('is-showing');
+      }
+
+      // Light up each word whose start time has passed.
+      const words = lyricsEl.querySelectorAll('.lyric-word');
+      for (let i = 0; i < words.length; i++) {
+        const wordTime = parseFloat(words[i].dataset.time);
+        if (t >= wordTime) words[i].classList.add('is-sung');
+      }
     }
 
     // ── Time ────────────────────────────────────────────────
@@ -131,12 +157,30 @@
       if (timeDur) timeDur.textContent = fmt(audio.duration);
     });
 
-    audio.addEventListener('timeupdate', () => {
-      if (!audio.duration) return;
-      const pct = (audio.currentTime / audio.duration) * 100;
-      if (progressFill) progressFill.style.width = pct + '%';
-      if (timeCur)      timeCur.textContent       = fmt(audio.currentTime);
-      updateLyrics(audio.currentTime);
+    // Smooth lyric + progress updates on a rAF loop for tight word sync
+    // (audio 'timeupdate' only fires ~4x/sec, which feels laggy).
+    let rafId = null;
+    function tickUI() {
+      const t = audio.currentTime;
+      if (!audio.paused && t > 0) {
+        if (audio.duration) {
+          const pct = (t / audio.duration) * 100;
+          if (progressFill) progressFill.style.width = pct + '%';
+        }
+        if (timeCur) timeCur.textContent = fmt(t);
+        updateLyrics(t);
+      }
+      rafId = requestAnimationFrame(tickUI);
+    }
+
+    audio.addEventListener('play', () => {
+      if (!rafId) rafId = requestAnimationFrame(tickUI);
+    });
+    audio.addEventListener('playing', () => {
+      if (!rafId) rafId = requestAnimationFrame(tickUI);
+    });
+    audio.addEventListener('pause', () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     });
 
     // Loop back to the start point (2:55) instead of the beginning.
@@ -175,6 +219,8 @@
         }
         await audio.play();
         setPlayingUI(true);
+        // Kick the rAF loop directly (some browsers are flaky about 'play' events).
+        if (!rafId) rafId = requestAnimationFrame(tickUI);
       } catch (err) {
         console.warn('[music] blocked:', err.message);
         isPlaying = false;

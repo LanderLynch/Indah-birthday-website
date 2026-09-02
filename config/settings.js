@@ -36,19 +36,19 @@ const MUSIC_TRACKS = [
     src:    "assets/music/song1.mp3",    //   (nama file mp3 — jangan diubah kecuali nama filenya beda)
     cover:  "assets/music/song1.jpeg",   //   (nama file cover — jangan diubah kecuali nama filenya beda)
     startTime: 175,                           // ← MULAI DARI DETIK KE BERAPA (2:55 = 175 dtk)
-    lyrics: [
-      { time: 175, text: "Cepat pulang, cepat kembali, jangan pergi lagi" },
-      { time: 184, text: "Firasatku ingin kau tuk cepat pulang" },
-      { time: 193, text: "Cepat kembali, jangan pergi lagi" },
-      { time: 202, text: "Alirnya bagai sungai yang mendamba samudera" },
-      { time: 211, text: "Ku tahu pasti kemanakan ku bermuara" },
-      { time: 220, text: "Semoga ada waktu, sayangku" },
-      { time: 229, text: "Ku percaya alam pun berbahasa" },
-      { time: 238, text: "Ada makna di balik semua pertanda" },
-      { time: 247, text: "Firasat ini rasa rindukah atau kah hanya bayang" },
-      { time: 256, text: "Aku tak peduli, ku terus berlari" },
-      { time: 265, text: "Cepat pulang, cepat kembali, jangan pergi lagi" },
-      { time: 274, text: "Firasatku ingin kau tuk cepat pulang" },
+    // Word-by-word lyric timings (seconds). Playback starts at 2:55, so the
+    // visible shining starts at the "Dan lihatlah, sayang" verse (2:51).
+    lyricWords: [
+      { time: 174.73, words: [["Hujan", 174.73], ["turun", 175.54], ["membasahi", 176.18]] },
+      { time: 178.08, words: [["Seolah", 178.08], ["turun", 179.22], ["air", 180.11], ["mata", 181.00]] },
+      { time: 182.02, words: [["Cepat", 182.02], ["pulang", 182.83]] },
+      { time: 184.98, words: [["Cepat", 184.98], ["kembali,", 185.43], ["jangan", 187.15], ["pergi", 188.40], ["lagi", 189.48]] },
+      { time: 191.85, words: [["Firasatku", 191.85], ["ingin", 193.52], ["kau", 194.61], ["'tuk", 195.24], ["cepat", 195.71], ["pulang", 196.56]] },
+      { time: 198.70, words: [["Cepat", 198.70], ["kembali,", 199.16], ["jangan", 200.83], ["pergi", 202.13], ["lagi", 203.18]] },
+      { time: 205.57, words: [["Firasatku", 205.57], ["ingin", 207.27], ["kau", 208.35], ["'tuk", 208.95], ["cepat", 209.42], ["pulang", 210.30]] },
+      { time: 212.24, words: [["Pulang", 212.24]] },
+      { time: 222.26, words: [["Aku", 222.26], ["pun", 222.88], ["sadari", 223.18]] },
+      { time: 225.74, words: [["Engkaulah", 225.74], ["firasat", 226.57], ["hati", 229.57]] },
     ],
   },
 ];

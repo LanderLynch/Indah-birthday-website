@@ -156,6 +156,17 @@
   opacity: 1;
 }
 
+/* Word-by-word shine: upcoming words dim, sung words glow bright */
+.lyric-word {
+  color: var(--c-foam-faint);
+  text-shadow: none;
+  transition: color 0.4s var(--ease-out), text-shadow 0.4s var(--ease-out);
+}
+.lyric-word.is-sung {
+  color: var(--c-foam);
+  text-shadow: 0 0 14px rgba(124, 232, 240, 0.9), 0 0 28px rgba(42, 212, 212, 0.5);
+}
+
 /* ── Title & Artist ──────────────────────────────────────── */
 .music-player__meta {
   display: flex;

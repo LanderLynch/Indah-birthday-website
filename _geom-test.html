@@ -66,13 +66,13 @@
       </svg>
     </div>
 
-    <!-- Countdown phase: shown until Sept 6, 23:59 -->
+    <!-- Always-visible: countdown + the code + input -->
     <div class="pin-lock__countdown" id="pinCountdown">
       <span class="eyebrow pin-lock__eyebrow">For your eyes only</span>
       <h1 class="pin-lock__title">Almost Time</h1>
-      <p class="pin-lock__subtitle">Something has been waiting just past the surface — it unlocks on September 6th, just before midnight.</p>
+      <p class="pin-lock__subtitle">Something has been waiting just past the surface — it unlocks the moment September 7th begins. But the tide's already whispering the code to you…</p>
 
-      <div class="pin-lock__timer" id="pinTimer" role="timer" aria-live="polite" aria-label="Countdown to reveal">
+      <div class="pin-lock__timer" id="pinTimer" role="timer" aria-live="polite" aria-label="Countdown to September 7">
         <div class="pin-lock__timer-unit">
           <span class="pin-lock__timer-num" id="pinTimerDays">00</span>
           <span class="pin-lock__timer-label">Days</span>
@@ -95,22 +95,11 @@
       </div>
 
       <p class="pin-lock__hint">Hmm… I heard a whisper in the current — <em>I love you for a lifetime</em>, in a tongue older than the tide.</p>
-    </div>
-
-    <!-- Code phase: revealed when the countdown ends -->
-    <div class="pin-lock__reveal" id="pinReveal" hidden>
-      <span class="eyebrow pin-lock__eyebrow">The tide has come in</span>
-      <h1 class="pin-lock__title">The code is <span class="text-gold">5201314</span></h1>
-      <p class="pin-lock__subtitle">Type it below and let yourself in.</p>
 
       <form class="pin-lock__form" id="pinForm" autocomplete="off" novalidate>
         <div class="pin-lock__digits" id="pinDigits">
           <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinHiddenInput" class="pin-lock__hidden-input" autocomplete="one-time-code" aria-label="Secret code">
         </div>
-        <button type="submit" class="pin-lock__submit">
-          <span>Unlock it</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
       </form>
 
       <p class="pin-lock__error" id="pinError" role="alert" aria-live="assertive">
@@ -433,40 +422,33 @@ Semoga semua momen baik pelan-pelan datang ke kamu, stay warm, and keep shining 
 <script>
 (function () {
   function onReady(fn) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn);
-    } else {
-      fn();
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+    else fn();
   }
   onReady(function () {
-    var results = [];
-    var errors = [];
-    function check(name, cond, val) { results.push((cond ? 'PASS' : 'FAIL') + ': ' + name + (val ? ' [' + val + ']' : '')); }
-    window.addEventListener('error', function (e) { errors.push(e.message); });
-    window.addEventListener('unhandledrejection', function (e) { errors.push('promise: ' + e.reason); });
-
-    // Wait for the lock init to run and observe fresh state (real clock, Sept 2)
     setTimeout(function () {
+      var out = [];
       var lock = document.getElementById('pinLock');
-      var countdown = document.getElementById('pinCountdown');
-      var reveal = document.getElementById('pinReveal');
-      var days = document.getElementById('pinTimerDays');
-      var errText = errors.length ? errors.join(' | ') : '(none)';
-
-      check('lock screen present on load', !!lock);
-      check('countdown visible (before Sept 6)', !!countdown && !countdown.hidden);
-      check('reveal hidden', !!reveal && reveal.hidden);
-      check('countdown is counting down (days shows value)', !!days && /^\d{2}$/.test(days.textContent), days && days.textContent);
-      check('document has pin-locked class', document.documentElement.classList.contains('pin-locked'));
-      check('no js errors on load', errors.length === 0, errText);
-      results.push('INFO: today is ' + new Date().toString());
+      var card = document.querySelector('.pin-lock__card');
+      var cr = card.getBoundingClientRect();
+      var lr = lock.getBoundingClientRect();
+      out.push('viewport: ' + window.innerWidth + 'x' + window.innerHeight);
+      out.push('lock rect: ' + Math.round(lr.left) + ',' + Math.round(lr.top) + ' ' + Math.round(lr.width) + 'x' + Math.round(lr.height));
+      out.push('card rect: ' + Math.round(cr.left) + ',' + Math.round(cr.top) + ' ' + Math.round(cr.width) + 'x' + Math.round(cr.height));
+      out.push('card bottom: ' + Math.round(cr.bottom) + ' vs viewport ' + window.innerHeight);
+      out.push('card top: ' + Math.round(cr.top));
+      var cs = getComputedStyle(lock);
+      out.push('lock overflow-y: ' + cs.overflowY);
+      out.push('lock scrollH: ' + lock.scrollHeight + ' clientH: ' + lock.clientHeight);
+      out.push('card scrollH: ' + card.scrollHeight + ' clientH: ' + card.clientHeight);
+      out.push('lock bg image: ' + getComputedStyle(lock).backgroundImage.slice(0, 40));
+      out.push('body bg: ' + getComputedStyle(document.body).backgroundColor + ' html bg: ' + getComputedStyle(document.documentElement).backgroundColor);
 
       var el = document.createElement('pre');
-      el.setAttribute('id', 'access-results');
-      el.textContent = results.join('\n');
+      el.setAttribute('id', 'geom');
+      el.textContent = out.join('\n');
       document.body.appendChild(el);
-    }, 800);
+    }, 600);
   });
 })();
 </script>

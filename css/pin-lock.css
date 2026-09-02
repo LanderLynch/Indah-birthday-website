@@ -8,14 +8,12 @@
   inset: 0;
   z-index: var(--z-pin);
   display: flex;
-  align-items: center;
-  justify-content: center;
   padding: var(--sp-4);
   background:
     radial-gradient(ellipse 70% 55% at 50% 8%, rgba(42, 212, 212, 0.16), transparent 60%),
     radial-gradient(ellipse 60% 50% at 85% 90%, rgba(255, 215, 106, 0.08), transparent 65%),
     linear-gradient(180deg, var(--c-surface) 0%, var(--c-mid) 45%, var(--c-deep) 75%, var(--c-abyss) 100%);
-  overflow: hidden;
+  overflow-y: auto; /* whole screen scrolls if the card is taller than the viewport */
   transition: opacity 0.8s var(--ease-soft), filter 0.8s var(--ease-soft);
 }
 
@@ -86,6 +84,7 @@
   z-index: 1;
   width: 100%;
   max-width: 400px;
+  margin: auto; /* centers when it fits; scrolls from the top when it doesn't */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -146,12 +145,13 @@
   max-width: 30ch;
 }
 
-/* ---- Countdown phase ---- */
+/* ---- Countdown ---- */
 .pin-lock__countdown {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 100%;
 }
 
 .pin-lock__timer {
@@ -201,6 +201,15 @@
   opacity: 0.75;
 }
 
+/* ---- Form ---- */
+.pin-lock__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+}
+
 .pin-lock__hint {
   font-size: var(--fs-caption);
   color: var(--c-foam-dim);
@@ -216,29 +225,7 @@
   color: var(--c-bio-gold);
 }
 
-/* ---- Code reveal phase ---- */
-.pin-lock__reveal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  animation: pinRevealIn 0.8s var(--ease-out) both;
-}
-
-@keyframes pinRevealIn {
-  from { opacity: 0; transform: translateY(16px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.pin-lock__reveal[hidden] { display: none; }
-
-.pin-lock__form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-4);
-  width: 100%;
-}
+/* ---- Success state — soft sea-teal/gold glow, then the screen fades via .is-unlocked ---- */
 
 /* ---- Digit boxes ---- */
 .pin-lock__digits {
@@ -390,7 +377,23 @@
 .pin-lock__error svg { flex-shrink: 0; }
 
 @media (max-width: 480px) {
-  .pin-lock__card { padding: var(--sp-5) var(--sp-4) var(--sp-4); }
+  .pin-lock__card { padding: var(--sp-4) var(--sp-3) var(--sp-4); }
+}
+
+/* Compact on short viewports so the card never clips */
+@media (max-height: 700px) {
+  .pin-lock { align-items: safe center; padding: var(--sp-2); }
+  .pin-lock__card { padding: var(--sp-3) var(--sp-3); }
+  .pin-lock__mark { width: 42px; height: 42px; margin-bottom: var(--sp-2); }
+  .pin-lock__mark svg { width: 20px; height: 20px; }
+  .pin-lock__title { font-size: clamp(1.25rem, 4vw, 1.6rem); }
+  .pin-lock__subtitle { margin-bottom: var(--sp-3); font-size: 0.9rem; }
+  .pin-lock__timer { margin-bottom: var(--sp-3); }
+  .pin-lock__timer-unit { min-width: clamp(48px, 13vw, 62px); padding: var(--sp-1); }
+  .pin-lock__timer-num { font-size: clamp(1.4rem, 5vw, 1.8rem); }
+  .pin-lock__hint { margin-top: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
+  .pin-lock__form { gap: var(--sp-2); }
+  .pin-digit { width: clamp(34px, 9vw, 44px); height: clamp(40px, 10vw, 50px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

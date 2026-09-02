@@ -66,13 +66,13 @@
       </svg>
     </div>
 
-    <!-- Countdown phase: shown until Sept 6, 23:59 -->
+    <!-- Always-visible: countdown + the code + input -->
     <div class="pin-lock__countdown" id="pinCountdown">
       <span class="eyebrow pin-lock__eyebrow">For your eyes only</span>
       <h1 class="pin-lock__title">Almost Time</h1>
-      <p class="pin-lock__subtitle">Something has been waiting just past the surface — it unlocks on September 6th, just before midnight.</p>
+      <p class="pin-lock__subtitle">Waiting just past the surface — it unlocks the moment September 7th begins.</p>
 
-      <div class="pin-lock__timer" id="pinTimer" role="timer" aria-live="polite" aria-label="Countdown to reveal">
+      <div class="pin-lock__timer" id="pinTimer" role="timer" aria-live="polite" aria-label="Countdown to September 7">
         <div class="pin-lock__timer-unit">
           <span class="pin-lock__timer-num" id="pinTimerDays">00</span>
           <span class="pin-lock__timer-label">Days</span>
@@ -95,22 +95,11 @@
       </div>
 
       <p class="pin-lock__hint">Hmm… I heard a whisper in the current — <em>I love you for a lifetime</em>, in a tongue older than the tide.</p>
-    </div>
-
-    <!-- Code phase: revealed when the countdown ends -->
-    <div class="pin-lock__reveal" id="pinReveal" hidden>
-      <span class="eyebrow pin-lock__eyebrow">The tide has come in</span>
-      <h1 class="pin-lock__title">The code is <span class="text-gold">5201314</span></h1>
-      <p class="pin-lock__subtitle">Type it below and let yourself in.</p>
 
       <form class="pin-lock__form" id="pinForm" autocomplete="off" novalidate>
         <div class="pin-lock__digits" id="pinDigits">
           <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinHiddenInput" class="pin-lock__hidden-input" autocomplete="one-time-code" aria-label="Secret code">
         </div>
-        <button type="submit" class="pin-lock__submit">
-          <span>Unlock it</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
       </form>
 
       <p class="pin-lock__error" id="pinError" role="alert" aria-live="assertive">
